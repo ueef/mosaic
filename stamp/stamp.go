@@ -28,8 +28,8 @@ type stamp struct {
 
 func (s *stamp) Draw(x, y int, c color.Color, i draw.Image) {
 	d := font.Drawer{
-		Dst: i,
-		Src: image.NewUniform(c),
+		Dst:  i,
+		Src:  image.NewUniform(c),
 		Face: s.f,
 		Dot: fixed.Point26_6{
 			X: fixed.I(x + s.x),
@@ -58,8 +58,8 @@ func New(s float64, t string, h font.Hinting, f *truetype.Font) Stamp {
 	return &stamp{
 		f: ff,
 		t: t,
-		w: b.Max.X.Ceil()-b.Min.X.Ceil(),
-		h: b.Max.Y.Ceil()-b.Min.Y.Ceil(),
+		w: b.Max.X.Ceil() - b.Min.X.Ceil(),
+		h: b.Max.Y.Ceil() - b.Min.Y.Ceil(),
 		x: 0,
 		y: -b.Min.Y.Ceil(),
 	}
@@ -76,9 +76,12 @@ func NewFromMap(m map[string]interface{}) (Stamp, error) {
 		return nil, err
 	}
 
-	h, _, err := parse.GetFontHintingFromMap("hinting", m)
+	h, ok, err := parse.GetFontHintingFromMap("hinting", m)
 	if err != nil {
 		return nil, err
+	}
+	if !ok {
+		h = font.HintingFull
 	}
 
 	fs, err := parse.GetRequiredFloatFromMap("font_size", m)
