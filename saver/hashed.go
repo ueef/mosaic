@@ -3,7 +3,6 @@ package saver
 import (
 	"crypto/md5"
 	"encoding/base64"
-	"errors"
 	"github.com/ueef/mosaic/parse"
 	"io/ioutil"
 	"os"
