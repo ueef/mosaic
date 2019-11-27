@@ -5,7 +5,6 @@ import (
 	"github.com/anthonynsimon/bild/clone"
 	"github.com/ueef/mosaic/parse"
 	"github.com/ueef/mosaic/stamp"
-	"golang.org/x/image/font"
 	"image"
 	"image/color"
 	"image/draw"
@@ -14,15 +13,15 @@ import (
 const TypeText = "text"
 
 type Text struct {
-	Gravity string
-	Stamp stamp.Stamp
-	TextColor color.Color
+	Gravity         string
+	Stamp           stamp.Stamp
+	TextColor       color.Color
 	BackgroundColor color.Color
 }
 
 func (f *Text) Apply(img image.Image) (image.Image, error) {
 	p := 4
-	w, h := img.Bounds().Dx(), f.Stamp.GetHeight() + p*2
+	w, h := img.Bounds().Dx(), f.Stamp.GetHeight()+p*2
 
 	si := image.NewRGBA(image.Rectangle{
 		Min: image.Point{},
@@ -58,9 +57,9 @@ func (f *Text) Apply(img image.Image) (image.Image, error) {
 
 func NewText(g string, s stamp.Stamp, tc color.Color, bc color.Color) *Text {
 	return &Text{
-		Gravity: g,
-		Stamp: s,
-		TextColor: tc,
+		Gravity:         g,
+		Stamp:           s,
+		TextColor:       tc,
 		BackgroundColor: bc,
 	}
 }
@@ -75,17 +74,11 @@ func NewTextFromMap(m map[string]interface{}) (Filter, error) {
 		return nil, fmt.Errorf("a value of gravity only must be \"%s\" or \"%s\"", GravityNorth, GravitySouth)
 	}
 
-	f, err := parse.GetRequiredFontFromMap("font", m)
+	sm, err := parse.GetRequiredMapFromMap("stamp", m)
 	if err != nil {
 		return nil, err
 	}
-
-	fs, err := parse.GetRequiredFloatFromMap("font_size", m)
-	if err != nil {
-		return nil, err
-	}
-
-	t, err := parse.GetRequiredStringFromMap("text", m)
+	s, err := stamp.NewFromMap(sm)
 	if err != nil {
 		return nil, err
 	}
@@ -100,7 +93,7 @@ func NewTextFromMap(m map[string]interface{}) (Filter, error) {
 		return nil, err
 	}
 
-	return NewText(g, stamp.New(fs, t, font.HintingFull, f), tc, bc), nil
+	return NewText(g, s, tc, bc), nil
 }
 
 func init() {
