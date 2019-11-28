@@ -12,16 +12,16 @@ import (
 
 const TypeText = "text"
 
-type Text struct {
-	Gravity         string
-	Stamp           stamp.Stamp
-	TextColor       color.Color
-	BackgroundColor color.Color
+type text struct {
+	g  string
+	s  stamp.Stamp
+	tc color.Color
+	bc color.Color
 }
 
-func (f *Text) Apply(img image.Image) (image.Image, error) {
+func (f *text) Apply(img image.Image) (image.Image, error) {
 	p := 4
-	w, h := img.Bounds().Dx(), f.Stamp.GetHeight()+p*2
+	w, h := img.Bounds().Dx(), f.s.GetHeight()+p*2
 
 	si := image.NewRGBA(image.Rectangle{
 		Min: image.Point{},
@@ -31,8 +31,8 @@ func (f *Text) Apply(img image.Image) (image.Image, error) {
 		},
 	})
 
-	draw.Draw(si, si.Bounds(), image.NewUniform(f.BackgroundColor), image.Point{}, draw.Src)
-	f.Stamp.Draw((w-f.Stamp.GetWidth())/2, p, f.TextColor, si)
+	draw.Draw(si, si.Bounds(), image.NewUniform(f.bc), image.Point{}, draw.Src)
+	f.s.Draw((w-f.s.GetWidth())/2, p, f.tc, si)
 
 	ni, ok := img.(*image.RGBA)
 	if !ok {
@@ -40,7 +40,7 @@ func (f *Text) Apply(img image.Image) (image.Image, error) {
 	}
 
 	buf := make([]uint8, len(ni.Pix)+len(si.Pix))
-	switch f.Gravity {
+	switch f.g {
 	case GravityNorth:
 		copy(buf, si.Pix)
 		copy(buf[len(si.Pix):], ni.Pix)
@@ -55,23 +55,23 @@ func (f *Text) Apply(img image.Image) (image.Image, error) {
 	return ni, nil
 }
 
-func NewText(g string, s stamp.Stamp, tc color.Color, bc color.Color) *Text {
-	return &Text{
-		Gravity:         g,
-		Stamp:           s,
-		TextColor:       tc,
-		BackgroundColor: bc,
+func NewText(g string, s stamp.Stamp, tc color.Color, bc color.Color) Filter {
+	return &text{
+		g:  g,
+		s:  s,
+		tc: tc,
+		bc: bc,
 	}
 }
 
 func NewTextFromMap(m map[string]interface{}) (Filter, error) {
-	g, err := parse.GetRequiredStringFromMap("gravity", m)
+	g, err := parse.GetRequiredStringFromMap("g", m)
 	if err != nil {
 		return nil, err
 	}
 
 	if g != GravityNorth && g != GravitySouth {
-		return nil, fmt.Errorf("a value of gravity only must be \"%s\" or \"%s\"", GravityNorth, GravitySouth)
+		return nil, fmt.Errorf("a value of g only must be \"%s\" or \"%s\"", GravityNorth, GravitySouth)
 	}
 
 	sm, err := parse.GetRequiredMapFromMap("stamp", m)

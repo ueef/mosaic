@@ -9,76 +9,76 @@ import (
 
 const TypeThumbnail = "thumbnail"
 
-type Thumbnail struct {
-	width   int
-	height  int
-	gravity string
+type thumbnail struct {
+	w int
+	h int
+	g string
 }
 
-func (filter Thumbnail) Apply(img image.Image) (image.Image, error) {
+func (filter thumbnail) Apply(img image.Image) (image.Image, error) {
 	x, y, w, h := 0, 0, img.Bounds().Max.X, img.Bounds().Max.Y
 	f := float32(w) / float32(h)
 
-	rw, rh := filter.width, int(float32(filter.width)/f)
-	if rw < filter.width || rh < filter.height {
-		rw, rh = int(float32(filter.height)*f), filter.height
+	rw, rh := filter.w, int(float32(filter.w)/f)
+	if rw < filter.w || rh < filter.h {
+		rw, rh = int(float32(filter.h)*f), filter.h
 	}
 
 	img = transform.Resize(img, rw, rh, transform.Linear)
 
-	switch filter.gravity {
+	switch filter.g {
 	case GravityEast:
-		x = rw - filter.width
-		y = (rh - filter.height) / 2
+		x = rw - filter.w
+		y = (rh - filter.h) / 2
 	case GravityWest:
 		x = 0
-		y = (rh - filter.height) / 2
+		y = (rh - filter.h) / 2
 	case GravitySouth:
-		x = (rw - filter.width) / 2
-		y = rh - filter.height
+		x = (rw - filter.w) / 2
+		y = rh - filter.h
 	case GravitySouthEast:
-		x = rw - filter.width
-		y = rh - filter.height
+		x = rw - filter.w
+		y = rh - filter.h
 	case GravitySouthWest:
 		x = 0
-		y = rh - filter.height
+		y = rh - filter.h
 	case GravityNorth:
-		x = (rw - filter.width) / 2
+		x = (rw - filter.w) / 2
 		y = 0
 	case GravityNorthEast:
-		x = rw - filter.width
+		x = rw - filter.w
 		y = 0
 	case GravityNorthWest:
 		x = 0
 		y = 0
 	case GravityCenter:
-		x = (rw - filter.width) / 2
-		y = (rh - filter.height) / 2
+		x = (rw - filter.w) / 2
+		y = (rh - filter.h) / 2
 	default:
-		return nil, errors.New("unexpected value of gravity")
+		return nil, errors.New("unexpected value of g")
 	}
 
-	img = transform.Crop(img, image.Rect(x, y, x+filter.width, y+filter.height))
+	img = transform.Crop(img, image.Rect(x, y, x+filter.w, y+filter.h))
 
 	return img, nil
 }
 
-func NewThumbnail(w, h int, g string) *Thumbnail {
-	return &Thumbnail{w, h, g}
+func NewThumbnail(w, h int, g string) Filter {
+	return &thumbnail{w, h, g}
 }
 
 func NewThumbnailFromMap(m map[string]interface{}) (Filter, error) {
-	width, err := parse.GetRequiredIntFromMap("width", m)
+	width, err := parse.GetRequiredIntFromMap("w", m)
 	if err != nil {
 		return nil, err
 	}
 
-	height, err := parse.GetRequiredIntFromMap("height", m)
+	height, err := parse.GetRequiredIntFromMap("h", m)
 	if err != nil {
 		return nil, err
 	}
 
-	gravity, err := parse.GetRequiredStringFromMap("gravity", m)
+	gravity, err := parse.GetRequiredStringFromMap("g", m)
 	if err != nil {
 		return nil, err
 	}

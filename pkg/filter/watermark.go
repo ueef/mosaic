@@ -11,12 +11,12 @@ import (
 
 const TypeWatermark = "watermark"
 
-type Watermark struct {
+type watermark struct {
 	s  []stamp.Stamp
 	cs int
 }
 
-func (f Watermark) Apply(img image.Image) (image.Image, error) {
+func (f watermark) Apply(img image.Image) (image.Image, error) {
 	rgba, ok := img.(*image.RGBA)
 	if !ok {
 		rgba = clone.AsRGBA(img)
@@ -31,7 +31,7 @@ func (f Watermark) Apply(img image.Image) (image.Image, error) {
 	return rgba, nil
 }
 
-func (f Watermark) drawWatermarks(g *grid, i *image.RGBA) {
+func (f watermark) drawWatermarks(g *grid, i *image.RGBA) {
 	cx, cy := g.x+g.w/2, g.y+g.h/2
 	maxr := g.w
 	if g.h > g.w {
@@ -74,7 +74,7 @@ func (f Watermark) drawWatermarks(g *grid, i *image.RGBA) {
 	}
 }
 
-func (f Watermark) drawWatermark(gx, gy int, s stamp.Stamp, g *grid, i *image.RGBA) {
+func (f watermark) drawWatermark(gx, gy int, s stamp.Stamp, g *grid, i *image.RGBA) {
 	if !g.isCorrect(gx, gy) || g.get(gx, gy) {
 		return
 	}
@@ -115,8 +115,8 @@ func (f Watermark) drawWatermark(gx, gy int, s stamp.Stamp, g *grid, i *image.RG
 	s.Draw(minx*g.cs, miny*g.cs, color.RGBA{0, 0, 0, 255}, i)
 }
 
-func NewWatermark(cs int, s []stamp.Stamp) *Watermark {
-	return &Watermark{
+func NewWatermark(cs int, s []stamp.Stamp) Filter {
+	return &watermark{
 		cs: cs,
 		s:  s,
 	}

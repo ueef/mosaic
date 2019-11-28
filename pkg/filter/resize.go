@@ -8,12 +8,12 @@ import (
 
 const TypeResize = "resize"
 
-type Resize struct {
+type resize struct {
 	w int
 	h int
 }
 
-func (f Resize) Apply(img image.Image) (image.Image, error) {
+func (f resize) Apply(img image.Image) (image.Image, error) {
 	if f.w == 0 && f.h == 0 {
 		return img, nil
 	}
@@ -42,17 +42,17 @@ func (f Resize) Apply(img image.Image) (image.Image, error) {
 	return img, nil
 }
 
-func NewResize(w, h int) *Resize {
-	return &Resize{w, h}
+func NewResize(w, h int) Filter {
+	return &resize{w, h}
 }
 
 func NewResizeFromMap(m map[string]interface{}) (Filter, error) {
-	width, _, err := parse.GetIntFromMap("width", m)
+	width, _, err := parse.GetIntFromMap("w", m)
 	if err != nil {
 		return nil, err
 	}
 
-	height, _, err := parse.GetIntFromMap("height", m)
+	height, _, err := parse.GetIntFromMap("h", m)
 	if err != nil {
 		return nil, err
 	}

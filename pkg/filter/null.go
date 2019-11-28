@@ -6,14 +6,14 @@ import (
 
 const TypeNull = "null"
 
-type Null struct{}
+type null struct{}
 
-func (f Null) Apply(img image.Image) (image.Image, error) {
+func (f null) Apply(img image.Image) (image.Image, error) {
 	return img, nil
 }
 
-func NewNull() *Null {
-	return &Null{}
+func NewNull() Filter {
+	return &null{}
 }
 
 func NewNullFromMap(m map[string]interface{}) (Filter, error) {
