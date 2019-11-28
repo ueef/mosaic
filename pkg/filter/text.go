@@ -65,7 +65,7 @@ func NewText(g string, s stamp.Stamp, tc color.Color, bc color.Color) Filter {
 }
 
 func NewTextFromMap(m map[string]interface{}) (Filter, error) {
-	g, err := parse.GetRequiredStringFromMap("g", m)
+	g, err := parse.GetRequiredStringFromMap("gravity", m)
 	if err != nil {
 		return nil, err
 	}
