@@ -2,17 +2,21 @@ package parse
 
 import (
 	"fmt"
+	"github.com/anthonynsimon/bild/clone"
 	"github.com/golang/freetype"
 	"github.com/golang/freetype/truetype"
 	"golang.org/x/image/font"
+	"image"
 	"image/color"
 	"io/ioutil"
+	"os"
 	"regexp"
 	"strconv"
 	"strings"
 )
 
-var parsedFonts = map[string]*truetype.Font{}
+var fonts = map[string]*truetype.Font{}
+var images = map[string]*image.RGBA{}
 
 func GetMapFromMap(k string, m map[string]interface{}) (map[string]interface{}, bool, error) {
 	o, ok := m[k]
@@ -198,7 +202,7 @@ func GetFontFromMap(k string, m map[string]interface{}) (*truetype.Font, bool, e
 		return nil, false, err
 	}
 
-	f, ok := parsedFonts[v]
+	f, ok := fonts[v]
 	if ok {
 		return f, true, nil
 	}
@@ -213,13 +217,53 @@ func GetFontFromMap(k string, m map[string]interface{}) (*truetype.Font, bool, e
 		return nil, true, err
 	}
 
-	parsedFonts[v] = f
+	fonts[v] = f
 
 	return f, true, nil
 }
 
 func GetRequiredFontFromMap(k string, m map[string]interface{}) (*truetype.Font, error) {
 	v, ok, err := GetFontFromMap(k, m)
+	if !ok {
+		return nil, fmt.Errorf("a key \"%s\" is undefined in map %v", k, m)
+	}
+
+	return v, err
+}
+
+func GetImageFromMap(k string, m map[string]interface{}) (*image.RGBA, bool, error) {
+	v, ok, err := GetStringFromMap(k, m)
+	if !ok || err != nil {
+		return nil, false, err
+	}
+
+	i, ok := images[v]
+	if ok {
+		return i, true, nil
+	}
+
+	f, err := os.Open(v)
+	if err != nil {
+		return nil, true, err
+	}
+
+	d, _, err := image.Decode(f)
+	if err != nil {
+		return nil, true, err
+	}
+
+	i, ok = d.(*image.RGBA)
+	if !ok {
+		i = clone.AsRGBA(d)
+	}
+
+	images[v] = i
+
+	return i, true, nil
+}
+
+func GetRequiredImageFromMap(k string, m map[string]interface{}) (*image.RGBA, error) {
+	v, ok, err := GetImageFromMap(k, m)
 	if !ok {
 		return nil, fmt.Errorf("a key \"%s\" is undefined in map %v", k, m)
 	}
