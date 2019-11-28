@@ -9,8 +9,12 @@ import (
 
 const GravityEast string = "east"
 const GravityWest string = "west"
-const GravitySouth string = "south"
 const GravityNorth string = "north"
+const GravityNorthEast string = "north_east"
+const GravityNorthWest string = "north_west"
+const GravitySouth string = "south"
+const GravitySouthEast string = "south_east"
+const GravitySouthWest string = "south_west"
 const GravityCenter string = "center"
 
 var registered = map[string]func(m map[string]interface{}) (Filter, error){}
