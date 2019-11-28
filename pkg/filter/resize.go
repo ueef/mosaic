@@ -19,7 +19,7 @@ func (f Resize) Apply(img image.Image) (image.Image, error) {
 	}
 
 	b := img.Bounds()
-	if b.Dx() < f.w && b.Dy() < f.h {
+	if (f.w == 0 || b.Dx() < f.w) && (f.h == 0 || b.Dy() < f.h) {
 		return img, nil
 	}
 
