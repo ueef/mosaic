@@ -47,12 +47,12 @@ func NewResize(w, h int) Filter {
 }
 
 func NewResizeFromMap(m map[string]interface{}) (Filter, error) {
-	width, _, err := parse.GetIntFromMap("w", m)
+	width, _, err := parse.GetIntFromMap("width", m)
 	if err != nil {
 		return nil, err
 	}
 
-	height, _, err := parse.GetIntFromMap("h", m)
+	height, _, err := parse.GetIntFromMap("height", m)
 	if err != nil {
 		return nil, err
 	}

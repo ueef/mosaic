@@ -64,26 +64,30 @@ func (filter thumbnail) Apply(img image.Image) (image.Image, error) {
 }
 
 func NewThumbnail(w, h int, g string) Filter {
+	if g == "" {
+		g = GravityCenter
+	}
+
 	return &thumbnail{w, h, g}
 }
 
 func NewThumbnailFromMap(m map[string]interface{}) (Filter, error) {
-	width, err := parse.GetRequiredIntFromMap("w", m)
+	w, err := parse.GetRequiredIntFromMap("width", m)
 	if err != nil {
 		return nil, err
 	}
 
-	height, err := parse.GetRequiredIntFromMap("h", m)
+	h, err := parse.GetRequiredIntFromMap("height", m)
 	if err != nil {
 		return nil, err
 	}
 
-	gravity, err := parse.GetRequiredStringFromMap("g", m)
+	g, _, err := parse.GetStringFromMap("gravity", m)
 	if err != nil {
 		return nil, err
 	}
 
-	return NewThumbnail(width, height, gravity), nil
+	return NewThumbnail(w, h, g), nil
 }
 
 func init() {

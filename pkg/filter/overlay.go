@@ -125,7 +125,7 @@ func NewOverlayFromMap(m map[string]interface{}) (Filter, error) {
 		return nil, err
 	}
 
-	g, _, err := parse.GetStringFromMap("g", m)
+	g, _, err := parse.GetStringFromMap("gravity", m)
 	if err != nil {
 		return nil, err
 	}
