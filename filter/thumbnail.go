@@ -36,8 +36,20 @@ func (filter Thumbnail) Apply(img image.Image) (image.Image, error) {
 	case GravitySouth:
 		x = (rw - filter.width) / 2
 		y = rh - filter.height
+	case GravitySouthEast:
+		x = rw - filter.width
+		y = rh - filter.height
+	case GravitySouthWest:
+		x = 0
+		y = rh - filter.height
 	case GravityNorth:
 		x = (rw - filter.width) / 2
+		y = 0
+	case GravityNorthEast:
+		x = rw - filter.width
+		y = 0
+	case GravityNorthWest:
+		x = 0
 		y = 0
 	case GravityCenter:
 		x = (rw - filter.width) / 2
