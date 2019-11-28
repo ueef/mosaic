@@ -2,7 +2,7 @@ package filter
 
 import (
 	"github.com/anthonynsimon/bild/transform"
-	"github.com/ueef/mosaic/parse"
+	"github.com/ueef/mosaic/pkg/parse"
 	"image"
 )
 

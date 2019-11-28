@@ -3,7 +3,7 @@ package dispatcher
 import (
 	"bytes"
 	"fmt"
-	"github.com/ueef/mosaic/picture"
+	"github.com/ueef/mosaic/pkg/picture"
 	"image"
 	"sync"
 )

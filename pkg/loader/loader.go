@@ -1,32 +1,29 @@
-package saver
+package loader
 
 import (
 	"errors"
-	"github.com/ueef/mosaic/parse"
+	"github.com/ueef/mosaic/pkg/parse"
 )
 
-const TypeNull = "null"
+const TypeHttp = "http"
 const TypeDirect = "direct"
-const TypeHashed = "hashed"
 
-type Saver interface {
-	Save(path string, data []byte) error
+type Loader interface {
+	Load(path string) ([]byte, error)
 }
 
-func New(t string, m map[string]interface{}) (s Saver, err error) {
+func New(t string, m map[string]interface{}) (s Loader, err error) {
 	switch t {
-	case TypeNull:
-		return NewNullFromMap(m)
+	case TypeHttp:
+		return NewHttpFromMap(m)
 	case TypeDirect:
 		return NewDirectFromMap(m)
-	case TypeHashed:
-		return NewHashedFromMap(m)
 	}
 
-	return nil, errors.New("type of Saver \"" + t + "\" is undefined")
+	return nil, errors.New("type of loader \"" + t + "\" is undefined")
 }
 
-func NewFromConfig(c interface{}) (s Saver, err error) {
+func NewFromConfig(c interface{}) (s Loader, err error) {
 	m, ok := c.(map[string]interface{})
 	if !ok {
 		return nil, errors.New("a config must be of the type map[string]interface{}")

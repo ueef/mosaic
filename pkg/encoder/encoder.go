@@ -2,7 +2,7 @@ package encoder
 
 import (
 	"errors"
-	"github.com/ueef/mosaic/parse"
+	"github.com/ueef/mosaic/pkg/parse"
 	"image"
 )
 

@@ -2,8 +2,8 @@ package filter
 
 import (
 	"github.com/anthonynsimon/bild/clone"
-	"github.com/ueef/mosaic/parse"
-	"github.com/ueef/mosaic/stamp"
+	"github.com/ueef/mosaic/pkg/parse"
+	"github.com/ueef/mosaic/pkg/stamp"
 	"image"
 	"image/color"
 	"math"
@@ -90,7 +90,7 @@ func (f Watermark) drawWatermark(gx, gy int, s stamp.Stamp, g *grid, i *image.RG
 
 	mgx, mgy := gw, gh
 	minx, miny := gx, gy
-	maxx, maxy := minx + gw, miny + gh
+	maxx, maxy := minx+gw, miny+gh
 
 	if !g.isCorrect(minx, miny) || !g.isCorrect(maxx-1, maxy-1) {
 		return
@@ -104,8 +104,8 @@ func (f Watermark) drawWatermark(gx, gy int, s stamp.Stamp, g *grid, i *image.RG
 		}
 	}
 
-	for x := minx-mgx; x < maxx+mgx; x++ {
-		for y := miny-mgy; y < maxy+mgy; y++ {
+	for x := minx - mgx; x < maxx+mgx; x++ {
+		for y := miny - mgy; y < maxy+mgy; y++ {
 			if g.isCorrect(x, y) {
 				g.set(x, y, true)
 			}

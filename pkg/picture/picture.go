@@ -2,11 +2,11 @@ package picture
 
 import (
 	"errors"
-	"github.com/ueef/mosaic/encoder"
-	"github.com/ueef/mosaic/filter"
-	"github.com/ueef/mosaic/loader"
-	"github.com/ueef/mosaic/parse"
-	"github.com/ueef/mosaic/saver"
+	"github.com/ueef/mosaic/pkg/encoder"
+	"github.com/ueef/mosaic/pkg/filter"
+	"github.com/ueef/mosaic/pkg/loader"
+	"github.com/ueef/mosaic/pkg/parse"
+	"github.com/ueef/mosaic/pkg/saver"
 	"regexp"
 )
 

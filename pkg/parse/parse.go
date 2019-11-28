@@ -161,7 +161,7 @@ func GetColorFromMap(k string, m map[string]interface{}) (color.Color, bool, err
 		return nil, true, err
 	}
 	if ok {
-		cv := [4]uint8{0,0,0,0}
+		cv := [4]uint8{0, 0, 0, 0}
 		for i, s := range strings.Split(v[5:len(v)-1], ",") {
 			v, err := strconv.ParseUint(s, 10, 8)
 			if err != nil {

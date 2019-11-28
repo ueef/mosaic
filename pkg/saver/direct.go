@@ -1,7 +1,7 @@
 package saver
 
 import (
-	"github.com/ueef/mosaic/parse"
+	"github.com/ueef/mosaic/pkg/parse"
 	"io/ioutil"
 	"os"
 	"path/filepath"

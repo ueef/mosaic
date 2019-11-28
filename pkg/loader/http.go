@@ -2,7 +2,7 @@ package loader
 
 import (
 	"errors"
-	"github.com/ueef/mosaic/parse"
+	"github.com/ueef/mosaic/pkg/parse"
 	"io/ioutil"
 	"net/http"
 	"regexp"

@@ -2,7 +2,7 @@ package filter
 
 import (
 	"github.com/anthonynsimon/bild/blur"
-	"github.com/ueef/mosaic/parse"
+	"github.com/ueef/mosaic/pkg/parse"
 	"image"
 )
 

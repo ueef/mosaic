@@ -3,7 +3,7 @@ package filter
 import (
 	"errors"
 	"fmt"
-	"github.com/ueef/mosaic/parse"
+	"github.com/ueef/mosaic/pkg/parse"
 	"image"
 )
 

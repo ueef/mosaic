@@ -3,7 +3,7 @@ package stamp
 import (
 	"errors"
 	"github.com/golang/freetype/truetype"
-	"github.com/ueef/mosaic/parse"
+	"github.com/ueef/mosaic/pkg/parse"
 	"golang.org/x/image/font"
 	"golang.org/x/image/math/fixed"
 	"image"

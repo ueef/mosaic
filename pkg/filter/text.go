@@ -3,8 +3,8 @@ package filter
 import (
 	"fmt"
 	"github.com/anthonynsimon/bild/clone"
-	"github.com/ueef/mosaic/parse"
-	"github.com/ueef/mosaic/stamp"
+	"github.com/ueef/mosaic/pkg/parse"
+	"github.com/ueef/mosaic/pkg/stamp"
 	"image"
 	"image/color"
 	"image/draw"

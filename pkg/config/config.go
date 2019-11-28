@@ -3,8 +3,8 @@ package config
 import (
 	"encoding/json"
 	"errors"
-	"github.com/ueef/mosaic/parse"
-	"github.com/ueef/mosaic/picture"
+	"github.com/ueef/mosaic/pkg/parse"
+	"github.com/ueef/mosaic/pkg/picture"
 	"gopkg.in/yaml.v3"
 	"io/ioutil"
 	"os"
