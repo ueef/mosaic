@@ -21,6 +21,8 @@ func save(r *Response) *Response {
 	if err != nil {
 		fmt.Println(err)
 	}
+
+	return r
 }
 
 func process(r *Response) *Response {
