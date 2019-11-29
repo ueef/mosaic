@@ -3,7 +3,6 @@ package config
 import (
 	"encoding/json"
 	"errors"
-	"github.com/ueef/mosaic/pkg/parse"
 	"github.com/ueef/mosaic/pkg/picture"
 	"gopkg.in/yaml.v3"
 	"io/ioutil"
@@ -11,31 +10,49 @@ import (
 	"path/filepath"
 )
 
-type Config struct {
-	Pictures picture.Pictures
-}
-
-func New(pc picture.Pictures) *Config {
-	return &Config{
-		Pictures: pc,
-	}
-}
-
-func NewFromMap(m map[string]interface{}) (*Config, error) {
-	i, err := parse.GetRequiredInterfaceFromMap("pictures", m)
-	if err != nil {
-		return nil, err
-	}
-	pc, err := picture.NewPicturesFromConfig(i)
+func ParsePath(path string) (picture.Pictures, error) {
+	pics := picture.Pictures{}
+	paths, err := filepath.Glob(path)
 	if err != nil {
 		return nil, err
 	}
 
-	return New(*pc), nil
+	for _, path := range paths {
+		p, err := parseFile(path)
+		if err != nil {
+			return nil, err
+		}
+
+		pics = merge(pics, p)
+	}
+
+	return pics, nil
 }
 
-func ParseFile(name string) (*Config, error) {
-	f, err := os.Open(name)
+func ParsePaths(paths []string) (picture.Pictures, error) {
+	pics := picture.Pictures{}
+	for _, path := range paths {
+		p, err := ParsePath(path)
+		if err != nil {
+			return nil, err
+		}
+
+		pics = merge(pics, p)
+	}
+
+	return pics, nil
+}
+
+func merge(a, b picture.Pictures) picture.Pictures {
+	c := make(picture.Pictures, len(a)+len(b))
+	copy(c, a)
+	copy(c[len(a):], b)
+
+	return c
+}
+
+func parseFile(path string) (picture.Pictures, error) {
+	f, err := os.Open(path)
 	if err != nil {
 		return nil, err
 	}
@@ -46,7 +63,7 @@ func ParseFile(name string) (*Config, error) {
 		return nil, err
 	}
 
-	switch filepath.Ext(name) {
+	switch filepath.Ext(path) {
 	case ".json":
 		return parseJson(buf)
 	case ".yml":
@@ -54,26 +71,26 @@ func ParseFile(name string) (*Config, error) {
 	case ".yaml":
 		return parseYaml(buf)
 	default:
-		return nil, errors.New(name + " has an unsupported type")
+		return nil, errors.New(path + " has an unsupported type")
 	}
 }
 
-func parseYaml(d []byte) (*Config, error) {
-	c := make(map[string]interface{})
-	err := yaml.Unmarshal(d, &c)
-	if err != nil {
-		return nil, err
-	}
-
-	return NewFromMap(c)
-}
-
-func parseJson(d []byte) (*Config, error) {
-	c := make(map[string]interface{})
+func parseJson(d []byte) (picture.Pictures, error) {
+	c := make([]interface{}, 0)
 	err := json.Unmarshal(d, &c)
 	if err != nil {
 		return nil, err
 	}
 
-	return NewFromMap(c)
+	return picture.NewPicturesFromConfig(c)
+}
+
+func parseYaml(d []byte) (picture.Pictures, error) {
+	c := make([]interface{}, 0)
+	err := yaml.Unmarshal(d, &c)
+	if err != nil {
+		return nil, err
+	}
+
+	return picture.NewPicturesFromConfig(c)
 }

@@ -100,21 +100,16 @@ func NewPictureFromConfig(c interface{}) (*Picture, error) {
 	return New(s, l, f, e, h, p), nil
 }
 
-func NewPicturesFromConfig(c interface{}) (*Pictures, error) {
+func NewPicturesFromConfig(c []interface{}) (Pictures, error) {
 	var err error
 
-	s, ok := c.([]interface{})
-	if !ok {
-		return nil, errors.New("a config must be of the type []interface{}")
-	}
-
-	p := make(Pictures, len(s))
-	for i := range s {
-		p[i], err = NewPictureFromConfig(s[i])
+	p := make(Pictures, len(c))
+	for i := range c {
+		p[i], err = NewPictureFromConfig(c[i])
 		if err != nil {
 			return nil, err
 		}
 	}
 
-	return &p, nil
+	return p, nil
 }
