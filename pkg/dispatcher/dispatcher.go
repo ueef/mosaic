@@ -75,24 +75,18 @@ func (d *Dispatcher) process() {
 		r.Times["load"] = time.Since(t)
 
 		if r.IsSuccessful() {
-			d.ch.p <- r
-		} else {
-			d.ch.r <- r
+			d.ch.s <- r
 		}
+
+		d.ch.r <- r
 	}
 }
 
 func (d *Dispatcher) save() {
 	for r := range d.ch.s {
 		t := time.Now()
-		r = save(r)
+		_ = save(r)
 		r.Times["load"] = time.Since(t)
-
-		if r.IsSuccessful() {
-			d.ch.p <- r
-		} else {
-			d.ch.r <- r
-		}
 	}
 }
 
