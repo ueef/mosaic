@@ -76,21 +76,21 @@ func parseFile(path string) (picture.Pictures, error) {
 }
 
 func parseJson(d []byte) (picture.Pictures, error) {
-	c := make([]interface{}, 0)
+	c := struct{ Pictures []interface{} }{}
 	err := json.Unmarshal(d, &c)
 	if err != nil {
 		return nil, err
 	}
 
-	return picture.NewPicturesFromConfig(c)
+	return picture.NewPicturesFromConfig(c.Pictures)
 }
 
 func parseYaml(d []byte) (picture.Pictures, error) {
-	c := make([]interface{}, 0)
+	c := struct{ Pictures []interface{} }{}
 	err := yaml.Unmarshal(d, &c)
 	if err != nil {
 		return nil, err
 	}
 
-	return picture.NewPicturesFromConfig(c)
+	return picture.NewPicturesFromConfig(c.Pictures)
 }
