@@ -2,6 +2,8 @@ package filter
 
 import (
 	"errors"
+	"fmt"
+	"github.com/anthonynsimon/bild/clone"
 	"github.com/anthonynsimon/bild/transform"
 	"github.com/ueef/mosaic/pkg/parse"
 	"image"
@@ -16,51 +18,54 @@ type thumbnail struct {
 }
 
 func (filter thumbnail) Apply(img image.Image) (image.Image, error) {
-	x, y, w, h := 0, 0, img.Bounds().Max.X, img.Bounds().Max.Y
-	f := float32(w) / float32(h)
-
-	rw, rh := filter.w, int(float32(filter.w)/f)
-	if rw < filter.w || rh < filter.h {
-		rw, rh = int(float32(filter.h)*f), filter.h
+	rgba, ok := img.(*image.RGBA)
+	if !ok {
+		rgba = clone.AsRGBA(img)
 	}
 
-	img = transform.Resize(img, rw, rh, transform.Linear)
+	f := float32(rgba.Bounds().Dx()) / float32(rgba.Bounds().Dy())
 
+	w, h := filter.w, int(float32(filter.w)/f)
+	if w < filter.w || h < filter.h {
+		w, h = int(float32(filter.h)*f), filter.h
+	}
+
+	rgba = transform.Resize(rgba, w, h, transform.Linear)
+
+	x, y := 0, 0
 	switch filter.g {
 	case GravityEast:
-		x = rw - filter.w
-		y = (rh - filter.h) / 2
+		x = w - filter.w
+		y = (h - filter.h) / 2
 	case GravityWest:
 		x = 0
-		y = (rh - filter.h) / 2
+		y = (h - filter.h) / 2
 	case GravitySouth:
-		x = (rw - filter.w) / 2
-		y = rh - filter.h
+		x = (w - filter.w) / 2
+		y = h - filter.h
 	case GravitySouthEast:
-		x = rw - filter.w
-		y = rh - filter.h
+		x = w - filter.w
+		y = h - filter.h
 	case GravitySouthWest:
 		x = 0
-		y = rh - filter.h
+		y = h - filter.h
 	case GravityNorth:
-		x = (rw - filter.w) / 2
+		x = (w - filter.w) / 2
 		y = 0
 	case GravityNorthEast:
-		x = rw - filter.w
+		x = w - filter.w
 		y = 0
 	case GravityNorthWest:
 		x = 0
 		y = 0
 	case GravityCenter:
-		x = (rw - filter.w) / 2
-		y = (rh - filter.h) / 2
+		x = (w - filter.w) / 2
+		y = (h - filter.h) / 2
 	default:
 		return nil, errors.New("unexpected value of g")
 	}
 
-	img = transform.Crop(img, image.Rect(x, y, x+filter.w, y+filter.h))
-
-	return img, nil
+	return crop(rgba, x, y, x+filter.w, y+filter.h)
 }
 
 func NewThumbnail(w, h int, g string) Filter {
@@ -88,6 +93,29 @@ func NewThumbnailFromMap(m map[string]interface{}) (Filter, error) {
 	}
 
 	return NewThumbnail(w, h, g), nil
+}
+
+func crop(src *image.RGBA, x0, y0, x1, y1 int) (*image.RGBA, error) {
+	w, h := x1-x0, y1-y0
+	if x1 > src.Bounds().Max.X || y1 > src.Bounds().Max.Y {
+		return nil, fmt.Errorf("the cropping area is out of bounds")
+	}
+
+	dst := image.NewRGBA(image.Rectangle{
+		Min: image.Point{},
+		Max: image.Point{
+			X: w,
+			Y: h,
+		},
+	})
+
+	for y := 0; y < h; y++ {
+		a0, a1 := y*dst.Stride, y*dst.Stride+w*4
+		b0, b1 := (y+y0)*src.Stride+x0*4, (y+y0)*src.Stride+x1*4
+		copy(dst.Pix[a0:a1], src.Pix[b0:b1])
+	}
+
+	return dst, nil
 }
 
 func init() {
