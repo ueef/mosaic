@@ -415,10 +415,12 @@ func threshold(img *image.RGBA) []int {
 	a := w * h
 	s := make([]int, a)
 	for y := b.Min.Y; y < b.Max.Y; y++ {
+		i := y * w
+		pi := y*img.Stride + b.Min.X*4
 		for x := b.Min.X; x < b.Max.X; x++ {
-			i := y*b.Dx() + x
-			pi := y*img.Stride + x*4
 			s[i] = math.MaxUint8 - int(0.299*float64(img.Pix[pi+0])+0.587*float64(img.Pix[pi+1])+0.114*float64(img.Pix[pi+2]))
+			i++
+			pi += 4
 		}
 	}
 
