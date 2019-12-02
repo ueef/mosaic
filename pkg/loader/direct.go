@@ -4,14 +4,21 @@ import (
 	"github.com/ueef/mosaic/pkg/parse"
 	"io/ioutil"
 	"os"
+	"regexp"
 )
 
 type Direct struct {
-	Dir string
+	d string
+	r string
+	p *regexp.Regexp
 }
 
 func (s Direct) Load(path string) ([]byte, error) {
-	f, err := os.Open(s.Dir + "/" + path)
+	if nil != s.p {
+		path = s.p.ReplaceAllString(path, s.r)
+	}
+
+	f, err := os.Open(s.d + "/" + path)
 	if err != nil {
 		return nil, err
 	}
@@ -20,17 +27,29 @@ func (s Direct) Load(path string) ([]byte, error) {
 	return ioutil.ReadAll(f)
 }
 
-func NewDirect(dir string) *Direct {
+func NewDirect(dir, replace string, pattern *regexp.Regexp) *Direct {
 	return &Direct{
-		Dir: dir,
+		d: dir,
+		r: replace,
+		p: pattern,
 	}
 }
 
 func NewDirectFromMap(m map[string]interface{}) (*Direct, error) {
-	dir, err := parse.GetRequiredStringFromMap("dir", m)
+	d, err := parse.GetRequiredStringFromMap("dir", m)
 	if err != nil {
 		return nil, err
 	}
 
-	return NewDirect(dir), nil
+	r, _, err := parse.GetStringFromMap("replace", m)
+	if err != nil {
+		return nil, err
+	}
+
+	p, _, err := parse.GetRegexpFromMap("pattern", m)
+	if err != nil {
+		return nil, err
+	}
+
+	return NewDirect(d, r, p), nil
 }
