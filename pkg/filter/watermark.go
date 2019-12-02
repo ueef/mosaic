@@ -88,7 +88,8 @@ func (f watermark) drawWatermark(gx, gy int, s stamp.Stamp, g *grid, i *image.RG
 		gh++
 	}
 
-	mgx, mgy := gw, gh
+	mgx := gw
+	mgy := (mgx - gh) / 2
 	minx, miny := gx, gy
 	maxx, maxy := minx+gw, miny+gh
 
