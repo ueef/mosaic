@@ -186,11 +186,6 @@ func (g *grid) trim() {
 		p = g.w / 20
 	}
 
-	g.x = p
-	g.y = p
-	g.w = g.w - p*2
-	g.h = g.h - p*2
-
 	pt, pb, pr, pl := -1, -1, -1, -1
 	for y := g.y; y < g.y+g.h; y++ {
 		for x := g.x; x < g.x+g.w; x++ {
@@ -214,6 +209,22 @@ func (g *grid) trim() {
 				pr = x
 			}
 		}
+	}
+
+	if pt < p {
+		pt = p
+	}
+
+	if pb == -1 || pb > g.h-p {
+		pb = g.h - p
+	}
+
+	if pl < p {
+		pl = p
+	}
+
+	if pr == -1 || pr > g.w-p {
+		pr = g.w - p
 	}
 
 	g.x = pl
