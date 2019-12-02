@@ -18,7 +18,7 @@ func (s Direct) Load(path string) ([]byte, error) {
 		path = s.p.ReplaceAllString(path, s.r)
 	}
 
-	f, err := os.Open(s.d + "/" + path)
+	f, err := os.Open(s.d + path)
 	if err != nil {
 		return nil, err
 	}

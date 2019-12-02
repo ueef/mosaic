@@ -29,7 +29,7 @@ func (s Direct) Save(path string, data []byte) error {
 }
 
 func (s Direct) GetFilePath(path string) string {
-	return s.Dir + "/" + path
+	return s.Dir + path
 }
 
 func NewDirect(dir string) *Direct {
