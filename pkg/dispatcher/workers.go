@@ -9,7 +9,7 @@ import (
 func load(r *Response) *Response {
 	b, err := r.Pict.Loader.Load(r.Path)
 	if err != nil {
-		return NewErrorResponse(r.Path, err)
+		return NewErrorResponse(r.Path, err, r.Times)
 	}
 	r.Buff = b
 
@@ -28,18 +28,18 @@ func save(r *Response) *Response {
 func process(r *Response) *Response {
 	img, _, err := image.Decode(bytes.NewReader(r.Buff))
 	if err != nil {
-		return NewErrorResponse(r.Path, err)
+		return NewErrorResponse(r.Path, err, r.Times)
 	}
 	r.Buff = nil
 
 	img, err = r.Pict.Filter.Apply(img)
 	if err != nil {
-		return NewErrorResponse(r.Path, err)
+		return NewErrorResponse(r.Path, err, r.Times)
 	}
 
 	r.Buff, err = r.Pict.Encoder.Encode(img)
 	if err != nil {
-		return NewErrorResponse(r.Path, err)
+		return NewErrorResponse(r.Path, err, r.Times)
 	}
 
 	return r
