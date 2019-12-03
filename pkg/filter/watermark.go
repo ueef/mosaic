@@ -33,42 +33,38 @@ func (f watermark) Apply(img image.Image) (image.Image, error) {
 
 func (f watermark) drawWatermarks(g *grid, i *image.RGBA) {
 	cx, cy := g.x+g.w/2, g.y+g.h/2
-	maxr := g.w
-	if g.h > g.w {
-		maxr = g.h
+	ml := g.w
+	if g.w < g.h {
+		ml = g.h
 	}
 
 	for _, s := range f.s {
-		for r := 3; r < maxr; r += 1 {
-			x := 0
-			y := r
-			d := 1 - 2*r
-			e := 0
+		gx, gy := cx, cy
+		f.drawWatermark(gx, gy, s, g, i)
 
-			for y >= 0 {
-				f.drawWatermark(cx+x, cy+y, s, g, i)
-				f.drawWatermark(cx+x, cy-y, s, g, i)
-
-				f.drawWatermark(cx-x, cy+y, s, g, i)
-				f.drawWatermark(cx-x, cy-y, s, g, i)
-
-				e = 2*(d+y) - 1
-
-				if d < 0 && e <= 0 {
-					x++
-					d += 2*x + 1
-					continue
+		for l, v, vs := 2, &gx, 1; l <= ml; l += 2 {
+			gy--
+			gx--
+			for r := 0; r < 4; r++ {
+				switch r {
+				case 0:
+					v = &gx
+					vs = 1
+				case 1:
+					v = &gy
+					vs = 1
+				case 2:
+					v = &gx
+					vs = -1
+				case 3:
+					v = &gy
+					vs = -1
 				}
 
-				if d > 0 && e > 0 {
-					y--
-					d -= 2*y + 1
-					continue
+				for ls := 0; ls < l; ls++ {
+					*v += vs
+					f.drawWatermark(gx, gy, s, g, i)
 				}
-
-				x++
-				d += 2 * (x - y)
-				y--
 			}
 		}
 	}
@@ -88,11 +84,8 @@ func (f watermark) drawWatermark(gx, gy int, s stamp.Stamp, g *grid, i *image.RG
 		gh++
 	}
 
-	mgx := gw
-	mgy := (mgx - gh) / 2
-	minx, miny := gx, gy
+	minx, miny := gx-gw/2, gy-gh/2
 	maxx, maxy := minx+gw, miny+gh
-
 	if !g.isCorrect(minx, miny) || !g.isCorrect(maxx-1, maxy-1) {
 		return
 	}
@@ -105,15 +98,35 @@ func (f watermark) drawWatermark(gx, gy int, s stamp.Stamp, g *grid, i *image.RG
 		}
 	}
 
-	for x := minx - mgx; x < maxx+mgx; x++ {
-		for y := miny - mgy; y < maxy+mgy; y++ {
-			if g.isCorrect(x, y) {
-				g.set(x, y, true)
-			}
-		}
+	s.Draw(minx*g.cs, miny*g.cs, color.RGBA{0, 0, 0, 255}, i)
+
+	mf := float64(sh) / float64(sw) * 6
+	m := int(math.Round(float64(gw) * mf))
+	minx = minx - m
+	if minx < g.x {
+		minx = g.x
 	}
 
-	s.Draw(minx*g.cs, miny*g.cs, color.RGBA{0, 0, 0, 255}, i)
+	maxx = maxx + m
+	if maxx > g.x+g.w {
+		maxx = g.x + g.w
+	}
+
+	miny = miny - m
+	if miny < g.y {
+		miny = g.y
+	}
+
+	maxy = maxy + m
+	if maxy > g.y+g.h {
+		maxy = g.y + g.h
+	}
+
+	for x := minx; x < maxx; x++ {
+		for y := miny; y < maxy; y++ {
+			g.set(x, y, true)
+		}
+	}
 }
 
 func NewWatermark(cs int, s []stamp.Stamp) Filter {
