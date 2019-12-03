@@ -13,6 +13,7 @@ const TypeWatermark = "watermark"
 
 type watermark struct {
 	s  []stamp.Stamp
+	c  color.Color
 	cs int
 }
 
@@ -98,7 +99,7 @@ func (f watermark) drawWatermark(gx, gy int, s stamp.Stamp, g *grid, i *image.RG
 		}
 	}
 
-	s.Draw(minx*g.cs, miny*g.cs, color.RGBA{0, 0, 0, 255}, i)
+	s.Draw(minx*g.cs, miny*g.cs, f.c, i)
 
 	mf := float64(sh) / float64(sw) * 6
 	m := int(math.Round(float64(gw) * mf))
@@ -129,15 +130,20 @@ func (f watermark) drawWatermark(gx, gy int, s stamp.Stamp, g *grid, i *image.RG
 	}
 }
 
-func NewWatermark(cs int, s []stamp.Stamp) Filter {
+func NewWatermark(cs int, c color.Color, s []stamp.Stamp) Filter {
+	if c == nil {
+		c = color.Black
+	}
+
 	return &watermark{
-		cs: cs,
 		s:  s,
+		c:  c,
+		cs: cs,
 	}
 }
 
 func NewWatermarkFromMap(m map[string]interface{}) (Filter, error) {
-	cellSize, err := parse.GetRequiredIntFromMap("cell_size", m)
+	cs, err := parse.GetRequiredIntFromMap("cell_size", m)
 	if err != nil {
 		return nil, err
 	}
@@ -147,15 +153,20 @@ func NewWatermarkFromMap(m map[string]interface{}) (Filter, error) {
 		return nil, err
 	}
 
-	stamps := make([]stamp.Stamp, len(v))
+	c, _, err := parse.GetColorFromMap("color", m)
+	if err != nil {
+		return nil, err
+	}
+
+	s := make([]stamp.Stamp, len(v))
 	for i := range v {
-		stamps[i], err = stamp.NewFromConfig(v[i])
+		s[i], err = stamp.NewFromConfig(v[i])
 		if err != nil {
 			return nil, err
 		}
 	}
 
-	return NewWatermark(cellSize, stamps), nil
+	return NewWatermark(cs, c, s), nil
 }
 
 type grid struct {
