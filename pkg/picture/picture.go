@@ -26,9 +26,9 @@ func (p Picture) Match(host, path string) bool {
 type Pictures []*Picture
 
 func (p Pictures) Match(host, path string) (*Picture, error) {
-	for _, v := range p {
-		if v.Match(host, path) {
-			return v, nil
+	for i := len(p) - 1; i >= 0; i-- {
+		if p[i].Match(host, path) {
+			return p[i], nil
 		}
 	}
 
