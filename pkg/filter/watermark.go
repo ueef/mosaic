@@ -2,8 +2,10 @@ package filter
 
 import (
 	"github.com/anthonynsimon/bild/clone"
+	"github.com/golang/freetype/truetype"
 	"github.com/ueef/mosaic/pkg/parse"
 	"github.com/ueef/mosaic/pkg/stamp"
+	"golang.org/x/image/font"
 	"image"
 	"image/color"
 	"math"
@@ -12,9 +14,12 @@ import (
 const TypeWatermark = "watermark"
 
 type watermark struct {
-	s  []stamp.Stamp
+	t  string
+	f  *truetype.Font
+	h  font.Hinting
 	c  color.Color
 	cs int
+	sz []float64
 }
 
 func (f watermark) Apply(img image.Image) (image.Image, error) {
@@ -39,7 +44,7 @@ func (f watermark) drawWatermarks(g *grid, i *image.RGBA) {
 		ml = g.h
 	}
 
-	for _, s := range f.s {
+	for _, s := range f.makeStamps(i) {
 		gx, gy := cx, cy
 		f.drawWatermark(gx, gy, s, g, i)
 
@@ -130,15 +135,52 @@ func (f watermark) drawWatermark(gx, gy int, s stamp.Stamp, g *grid, i *image.RG
 	}
 }
 
-func NewWatermark(cs int, c color.Color, s []stamp.Stamp) Filter {
+func (f watermark) makeStamps(img image.Image) []stamp.Stamp {
+	b := img.Bounds()
+	width, height := float64(b.Dx()), float64(b.Dy())
+	protoStamp := stamp.New(128, f.t, f.h, f.f)
+	widthFactor := float64(protoStamp.GetWidth()) / float64(protoStamp.GetHeight())
+	heightFactor := float64(protoStamp.GetHeight()) / 128
+
+	i := 0
+	l := len(f.sz)
+	size := float64(9)
+	revStamps := make([]stamp.Stamp, 0, l)
+	for i < l {
+		size++
+		fh := size * heightFactor
+		fw := fh * widthFactor
+		if fw > width || fh > height {
+			break
+		}
+
+		if width/fw < f.sz[i] {
+			revStamps = append(revStamps, stamp.New(size, f.t, f.h, f.f))
+			i++
+		}
+	}
+
+	stamps := make([]stamp.Stamp, len(revStamps))
+	revStampsLength := len(revStamps)
+	for i := 0; i < revStampsLength; i++ {
+		stamps[i] = revStamps[revStampsLength-i-1]
+	}
+
+	return stamps
+}
+
+func NewWatermark(cs int, t string, c color.Color, h font.Hinting, f *truetype.Font) Filter {
 	if c == nil {
 		c = color.Black
 	}
 
 	return &watermark{
-		s:  s,
+		t:  t,
+		f:  f,
+		h:  h,
 		c:  c,
 		cs: cs,
+		sz: []float64{18, 14, 10, 8, 6, 4},
 	}
 }
 
@@ -148,7 +190,7 @@ func NewWatermarkFromMap(m map[string]interface{}) (Filter, error) {
 		return nil, err
 	}
 
-	v, err := parse.GetRequiredSliceOfInterfacesFromMap("stamps", m)
+	t, err := parse.GetRequiredStringFromMap("text", m)
 	if err != nil {
 		return nil, err
 	}
@@ -158,15 +200,20 @@ func NewWatermarkFromMap(m map[string]interface{}) (Filter, error) {
 		return nil, err
 	}
 
-	s := make([]stamp.Stamp, len(v))
-	for i := range v {
-		s[i], err = stamp.NewFromConfig(v[i])
-		if err != nil {
-			return nil, err
-		}
+	h, ok, err := parse.GetFontHintingFromMap("hinting", m)
+	if err != nil {
+		return nil, err
+	}
+	if !ok {
+		h = font.HintingFull
 	}
 
-	return NewWatermark(cs, c, s), nil
+	f, err := parse.GetRequiredFontFromMap("font", m)
+	if err != nil {
+		return nil, err
+	}
+
+	return NewWatermark(cs, t, c, h, f), nil
 }
 
 type grid struct {
