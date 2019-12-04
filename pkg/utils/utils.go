@@ -10,7 +10,7 @@ import (
 	"sync"
 )
 
-func Rotate90(i image.Image) image.Image {
+func Rotate270(i image.Image) image.Image {
 	src := ConvertToRGBA(i)
 	b := src.Bounds()
 	dst := image.NewRGBA(image.Rectangle{
@@ -51,7 +51,7 @@ func Rotate180(i image.Image) image.Image {
 	return src
 }
 
-func Rotate270(i image.Image) image.Image {
+func Rotate90(i image.Image) image.Image {
 	src := ConvertToRGBA(i)
 	b := src.Bounds()
 	dst := image.NewRGBA(image.Rectangle{
