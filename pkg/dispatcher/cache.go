@@ -12,6 +12,10 @@ type cache struct {
 }
 
 func (c *cache) get(k string) *Response {
+	if c.l == 0 {
+		return nil
+	}
+
 	c.m.Lock()
 	defer c.m.Unlock()
 
@@ -39,6 +43,10 @@ func (c *cache) get(k string) *Response {
 }
 
 func (c *cache) set(k string, r *Response) {
+	if c.l == 0 {
+		return
+	}
+
 	c.m.Lock()
 	defer c.m.Unlock()
 
