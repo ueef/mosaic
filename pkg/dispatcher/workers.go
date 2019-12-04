@@ -63,7 +63,7 @@ func fixOrientation(i image.Image, b []byte) image.Image {
 		return i
 	}
 
-	o, err := t.Int(8)
+	o, err := t.Int(0)
 	if err != nil {
 		return i
 	}
