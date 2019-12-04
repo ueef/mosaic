@@ -1,6 +1,7 @@
 package dispatcher
 
 import (
+	"fmt"
 	"github.com/ueef/mosaic/pkg/picture"
 	"time"
 )
@@ -9,6 +10,7 @@ type Dispatcher struct {
 	c  cache
 	a  awaiters
 	p  picture.Pictures
+	s  bool
 	ch struct {
 		s chan *Response
 		l chan *Response
@@ -18,6 +20,10 @@ type Dispatcher struct {
 }
 
 func (d *Dispatcher) Dispatch(host, path string) (<-chan *Response, error) {
+	if !d.s {
+		return nil, fmt.Errorf("the dispatcher must be started before use")
+	}
+
 	pict, err := d.p.Match(host, path)
 	if err != nil {
 		return nil, err
@@ -36,6 +42,7 @@ func (d *Dispatcher) Dispatch(host, path string) (<-chan *Response, error) {
 }
 
 func (d *Dispatcher) Start(ql, cl int) error {
+	d.s = true
 	d.c = *newCache(cl)
 	d.a = *newAwaiters()
 	d.ch.s = make(chan *Response, ql)
@@ -76,27 +83,28 @@ func (d *Dispatcher) process() {
 
 		if r.IsSuccessful() {
 			d.ch.s <- r
+		} else {
+			d.ch.r <- r
 		}
-
-		d.ch.r <- r
 	}
 }
 
 func (d *Dispatcher) save() {
 	for r := range d.ch.s {
 		t := time.Now()
-		_ = save(r)
+		r = save(r)
 		r.Times["saving"] = time.Since(t)
+
+		if r.IsSuccessful() {
+			d.c.set(r.Path, r)
+		}
+
+		d.ch.r <- r
 	}
 }
 
 func (d *Dispatcher) send() {
 	for r := range d.ch.r {
-		if r.IsSuccessful() {
-			d.c.set(r.Path, r)
-			d.ch.s <- r
-		}
-
 		for {
 			c := d.a.pop(r.Path)
 			if c == nil {
