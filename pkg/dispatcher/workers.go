@@ -3,6 +3,8 @@ package dispatcher
 import (
 	"bytes"
 	"fmt"
+	"github.com/rwcarlsen/goexif/exif"
+	"github.com/ueef/mosaic/pkg/utils"
 	"image"
 	_ "image/gif"
 	_ "image/jpeg"
@@ -33,6 +35,8 @@ func process(r *Response) *Response {
 	if err != nil {
 		return NewErrorResponse(r.Path, err, r.Times)
 	}
+
+	img = fixOrientation(img, r.Buff)
 	r.Buff = nil
 
 	img, err = r.Pict.Filter.Apply(img)
@@ -46,4 +50,32 @@ func process(r *Response) *Response {
 	}
 
 	return r
+}
+
+func fixOrientation(i image.Image, b []byte) image.Image {
+	e, err := exif.Decode(bytes.NewReader(b))
+	if err != nil {
+		return i
+	}
+
+	t, err := e.Get(exif.Orientation)
+	if err != nil {
+		return i
+	}
+
+	o, err := t.Int(8)
+	if err != nil {
+		return i
+	}
+
+	switch o {
+	case 3:
+		return utils.Rotate180(i)
+	case 6:
+		return utils.Rotate90(i)
+	case 8:
+		return utils.Rotate270(i)
+	}
+
+	return i
 }
