@@ -6,11 +6,11 @@ import (
 )
 
 type Response struct {
-	Err   error
-	Buff  []byte
-	Path  string
-	Pict  *picture.Picture
-	Times map[string]time.Duration
+	Err    error
+	Buff   []byte
+	Path   string
+	Pict   *picture.Picture
+	Timing map[string]time.Duration
 }
 
 func (r Response) IsSuccessful() bool {
@@ -19,20 +19,20 @@ func (r Response) IsSuccessful() bool {
 
 func NewResponse(path string, pict *picture.Picture) *Response {
 	return &Response{
-		Err:   nil,
-		Buff:  nil,
-		Path:  path,
-		Pict:  pict,
-		Times: map[string]time.Duration{},
+		Err:    nil,
+		Buff:   nil,
+		Path:   path,
+		Pict:   pict,
+		Timing: map[string]time.Duration{},
 	}
 }
 
 func NewErrorResponse(path string, err error, times map[string]time.Duration) *Response {
 	return &Response{
-		Err:   err,
-		Buff:  nil,
-		Path:  path,
-		Pict:  nil,
-		Times: times,
+		Err:    err,
+		Buff:   nil,
+		Path:   path,
+		Pict:   nil,
+		Timing: times,
 	}
 }

@@ -65,7 +65,7 @@ func (d *Dispatcher) load() {
 	for r := range d.ch.l {
 		t := time.Now()
 		r = load(r)
-		r.Times["loading"] = time.Since(t)
+		r.Timing["loading"] = time.Since(t)
 
 		if r.IsSuccessful() {
 			d.ch.p <- r
@@ -79,7 +79,7 @@ func (d *Dispatcher) process() {
 	for r := range d.ch.p {
 		t := time.Now()
 		r = process(r)
-		r.Times["processing"] = time.Since(t)
+		r.Timing["processing"] = time.Since(t)
 
 		if r.IsSuccessful() {
 			d.ch.s <- r
@@ -93,7 +93,7 @@ func (d *Dispatcher) save() {
 	for r := range d.ch.s {
 		t := time.Now()
 		r = save(r)
-		r.Times["saving"] = time.Since(t)
+		r.Timing["saving"] = time.Since(t)
 
 		if r.IsSuccessful() {
 			d.c.set(r.Path, r)
