@@ -49,10 +49,9 @@ func (d *Dispatcher) Start(ql, cl int) error {
 	d.ch.p = make(chan *Response, ql)
 	d.ch.r = make(chan *Response, ql)
 
-	go d.process()
-
 	for i := 0; i < ql; i++ {
 		go d.load()
+		go d.process()
 		go d.save()
 		go d.send()
 	}
