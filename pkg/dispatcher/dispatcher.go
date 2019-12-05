@@ -78,7 +78,7 @@ func (d *Dispatcher) load() {
 func (d *Dispatcher) process() {
 	for r := range d.ch.p {
 		t := time.Now()
-		r = process(r)
+		r := process(r)
 		r.Timing["processing"] = time.Since(t)
 
 		if r.IsSuccessful() {

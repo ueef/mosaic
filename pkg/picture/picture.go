@@ -13,7 +13,7 @@ import (
 type Picture struct {
 	Saver       saver.Saver
 	Loader      loader.Loader
-	Filter      filter.Filter
+	Filters     []filter.Filter
 	Encoder     encoder.Encoder
 	HostPattern *regexp.Regexp
 	PathPattern *regexp.Regexp
@@ -35,11 +35,11 @@ func (p Pictures) Match(host, path string) (*Picture, error) {
 	return nil, errors.New("there aren't any matching pictures")
 }
 
-func New(saver saver.Saver, loader loader.Loader, filter filter.Filter, encoder encoder.Encoder, hostPattern *regexp.Regexp, pathPattern *regexp.Regexp) *Picture {
+func New(saver saver.Saver, loader loader.Loader, filters []filter.Filter, encoder encoder.Encoder, hostPattern *regexp.Regexp, pathPattern *regexp.Regexp) *Picture {
 	return &Picture{
 		Saver:       saver,
 		Loader:      loader,
-		Filter:      filter,
+		Filters:     filters,
 		Encoder:     encoder,
 		HostPattern: hostPattern,
 		PathPattern: pathPattern,
@@ -47,52 +47,60 @@ func New(saver saver.Saver, loader loader.Loader, filter filter.Filter, encoder 
 }
 
 func NewPictureFromConfig(c interface{}) (*Picture, error) {
-	m, ok := c.(map[string]interface{})
+	mv, ok := c.(map[string]interface{})
 	if !ok {
 		return nil, errors.New("a config must be of the type map[string]interface{}")
 	}
 
-	i, err := parse.GetRequiredInterfaceFromMap("saver", m)
+	iv, err := parse.GetRequiredInterfaceFromMap("saver", mv)
 	if err != nil {
 		return nil, err
 	}
-	s, err := saver.NewFromConfig(i)
-	if err != nil {
-		return nil, err
-	}
-
-	i, err = parse.GetRequiredInterfaceFromMap("loader", m)
-	if err != nil {
-		return nil, err
-	}
-	l, err := loader.NewFromConfig(i)
+	s, err := saver.NewFromConfig(iv)
 	if err != nil {
 		return nil, err
 	}
 
-	i, err = parse.GetRequiredInterfaceFromMap("filter", m)
+	iv, err = parse.GetRequiredInterfaceFromMap("loader", mv)
 	if err != nil {
 		return nil, err
 	}
-	f, err := filter.NewFromConfig(i)
-	if err != nil {
-		return nil, err
-	}
-
-	i, err = parse.GetRequiredInterfaceFromMap("encoder", m)
-	if err != nil {
-		return nil, err
-	}
-	e, err := encoder.NewFromConfig(i)
+	l, err := loader.NewFromConfig(iv)
 	if err != nil {
 		return nil, err
 	}
 
-	h, _, err := parse.GetRegexpFromMap("host_pattern", m)
+	iv, err = parse.GetRequiredInterfaceFromMap("filter", mv)
 	if err != nil {
 		return nil, err
 	}
-	p, _, err := parse.GetRegexpFromMap("path_pattern", m)
+
+	sv, ok := iv.([]interface{})
+	if !ok {
+		sv = []interface{}{iv}
+	}
+	f := make([]filter.Filter, len(sv))
+	for i, iv := range sv {
+		f[i], err = filter.NewFromConfig(iv)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	iv, err = parse.GetRequiredInterfaceFromMap("encoder", mv)
+	if err != nil {
+		return nil, err
+	}
+	e, err := encoder.NewFromConfig(iv)
+	if err != nil {
+		return nil, err
+	}
+
+	h, _, err := parse.GetRegexpFromMap("host_pattern", mv)
+	if err != nil {
+		return nil, err
+	}
+	p, _, err := parse.GetRegexpFromMap("path_pattern", mv)
 	if err != nil {
 		return nil, err
 	}

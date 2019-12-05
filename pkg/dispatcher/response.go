@@ -27,12 +27,12 @@ func NewResponse(path string, pict *picture.Picture) *Response {
 	}
 }
 
-func NewErrorResponse(path string, err error, times map[string]time.Duration) *Response {
+func NewErrorResponse(path string, err error, timing map[string]time.Duration) *Response {
 	return &Response{
 		Err:    err,
 		Buff:   nil,
 		Path:   path,
 		Pict:   nil,
-		Timing: times,
+		Timing: timing,
 	}
 }

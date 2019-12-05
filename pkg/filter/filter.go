@@ -66,24 +66,14 @@ func NewFromMap(m map[string]interface{}) (Filter, error) {
 }
 
 func NewFromConfig(c interface{}) (Filter, error) {
-	var err error
-
-	s, ok := c.([]interface{})
+	m, ok := c.(map[string]interface{})
 	if !ok {
-		s = []interface{}{c}
+		return nil, errors.New("a config must contain a value of the type map[string]interface{}")
 	}
 
-	f := make(Filters, len(s))
-	for i := range s {
-		m, ok := s[i].(map[string]interface{})
-		if !ok {
-			return nil, errors.New("a config must contains a value of the type map[string]interface{}")
-		}
-
-		f[i], err = NewFromMap(m)
-		if err != nil {
-			return nil, err
-		}
+	f, err := NewFromMap(m)
+	if err != nil {
+		return nil, err
 	}
 
 	return f, nil
