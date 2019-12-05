@@ -3,7 +3,6 @@ package dispatcher
 import (
 	"fmt"
 	"github.com/ueef/mosaic/pkg/picture"
-	"time"
 )
 
 type Dispatcher struct {
@@ -63,9 +62,9 @@ func (d *Dispatcher) Start(ql, cl int) error {
 
 func (d *Dispatcher) load() {
 	for r := range d.ch.l {
-		t := time.Now()
+		r.Timing.Start("loading")
 		r = load(r)
-		r.Timing["loading"] = time.Since(t)
+		r.Timing.Stop()
 
 		if r.IsSuccessful() {
 			d.ch.p <- r
@@ -77,9 +76,9 @@ func (d *Dispatcher) load() {
 
 func (d *Dispatcher) process() {
 	for r := range d.ch.p {
-		t := time.Now()
+		r.Timing.Start("processing")
 		r := process(r)
-		r.Timing["processing"] = time.Since(t)
+		r.Timing.Stop()
 
 		if r.IsSuccessful() {
 			d.ch.s <- r
@@ -91,9 +90,9 @@ func (d *Dispatcher) process() {
 
 func (d *Dispatcher) save() {
 	for r := range d.ch.s {
-		t := time.Now()
+		r.Timing.Start("saving")
 		r = save(r)
-		r.Timing["saving"] = time.Since(t)
+		r.Timing.Stop()
 
 		if r.IsSuccessful() {
 			d.c.set(r.Path, r)

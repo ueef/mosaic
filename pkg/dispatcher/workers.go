@@ -9,7 +9,6 @@ import (
 	_ "image/gif"
 	_ "image/jpeg"
 	_ "image/png"
-	"time"
 )
 
 func load(r *Response) *Response {
@@ -32,30 +31,30 @@ func save(r *Response) *Response {
 }
 
 func process(r *Response) *Response {
-	t := time.Now()
+	r.Timing.Start("processing.decoding")
 	img, _, err := image.Decode(bytes.NewReader(r.Buff))
-	r.Timing["processing:decoding"] = time.Since(t)
+	r.Timing.Stop()
 	if err != nil {
 		return NewErrorResponse(r.Path, err, r.Timing)
 	}
 
-	t = time.Now()
+	r.Timing.Start("processing.orientation")
 	img = fixOrientation(img, r.Buff)
-	r.Timing["processing:orientation"] = time.Since(t)
+	r.Timing.Stop()
 	r.Buff = nil
 
 	for i := range r.Pict.Filters {
-		t = time.Now()
+		r.Timing.Start("processing." + fmt.Sprintf("%T", r.Pict.Filters[i])[1:])
 		img, err = r.Pict.Filters[i].Apply(img)
-		r.Timing["processing:"+fmt.Sprintf("%T\n", r.Pict.Filters[i])[1:]] = time.Since(t)
+		r.Timing.Stop()
 		if err != nil {
 			return NewErrorResponse(r.Path, err, r.Timing)
 		}
 	}
 
-	t = time.Now()
+	r.Timing.Start("processing.encoding")
 	r.Buff, err = r.Pict.Encoder.Encode(img)
-	r.Timing["processing:encoding"] = time.Since(t)
+	r.Timing.Stop()
 	if err != nil {
 		return NewErrorResponse(r.Path, err, r.Timing)
 	}
