@@ -21,7 +21,7 @@ type timer struct {
 	t []pin
 }
 
-func (t timer) Stop() {
+func (t *timer) Stop() {
 	for i := len(t.t) - 1; i >= 0; i-- {
 		if t.t[i].d == 0 {
 			t.t[i].d = time.Since(t.t[i].s)
@@ -30,7 +30,7 @@ func (t timer) Stop() {
 	}
 }
 
-func (t timer) Start(name string) {
+func (t *timer) Start(name string) {
 	t.t = append(t.t, pin{
 		n: name,
 		s: time.Now(),
