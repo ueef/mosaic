@@ -137,39 +137,35 @@ func (f watermark) drawWatermark(gx, gy int, s stamp.Stamp, g *grid, i *image.RG
 
 func (f watermark) makeStamps(img image.Image) []stamp.Stamp {
 	b := img.Bounds()
-	width, height := float64(b.Dx()), float64(b.Dy())
-	protoStamp := stamp.New(128, f.t, f.h, f.f)
-	widthFactor := float64(protoStamp.GetWidth()) / float64(protoStamp.GetHeight())
-	heightFactor := float64(protoStamp.GetHeight()) / 128
+	w, h := float64(b.Dx()), float64(b.Dy())
+	ps := stamp.New(128, f.t, f.h, f.f)
+	wf := float64(ps.GetHeight()) / float64(ps.GetWidth())
+	hf := float64(ps.GetHeight()) / 128
 
-	i := 0
 	l := len(f.sz)
-	size := float64(9)
-	revStamps := make([]stamp.Stamp, 0, l)
-	for i < l {
-		size++
-		fh := size * heightFactor
-		fw := fh * widthFactor
-		if fw > width || fh > height {
-			break
+	s := make([]stamp.Stamp, 0, l)
+	for i := l - 1; i >= 0; i-- {
+		fw := w / f.sz[i]
+		fh := fw * wf
+		if fh > h {
+			continue
 		}
 
-		if width/fw < f.sz[i] {
-			revStamps = append(revStamps, stamp.New(size, f.t, f.h, f.f))
-			i++
+		fs := fh * hf
+		if fs < 10 {
+			continue
 		}
+
+		s = append(s, stamp.New(fs, f.t, f.h, f.f))
 	}
 
-	stamps := make([]stamp.Stamp, len(revStamps))
-	revStampsLength := len(revStamps)
-	for i := 0; i < revStampsLength; i++ {
-		stamps[i] = revStamps[revStampsLength-i-1]
-	}
-
-	return stamps
+	return s
 }
 
 func NewWatermark(cs int, t string, c color.Color, h font.Hinting, f *truetype.Font) Filter {
+	if cs == 0 {
+		cs = 4
+	}
 	if c == nil {
 		c = color.Black
 	}
@@ -180,12 +176,12 @@ func NewWatermark(cs int, t string, c color.Color, h font.Hinting, f *truetype.F
 		h:  h,
 		c:  c,
 		cs: cs,
-		sz: []float64{18, 14, 10, 8, 6, 4},
+		sz: []float64{24, 18, 14, 10, 8, 6, 4},
 	}
 }
 
 func NewWatermarkFromMap(m map[string]interface{}) (Filter, error) {
-	cs, err := parse.GetRequiredIntFromMap("cell_size", m)
+	cs, _, err := parse.GetIntFromMap("cell_size", m)
 	if err != nil {
 		return nil, err
 	}
