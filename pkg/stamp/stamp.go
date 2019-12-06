@@ -76,12 +76,9 @@ func NewFromMap(m map[string]interface{}) (Stamp, error) {
 		return nil, err
 	}
 
-	h, ok, err := parse.GetFontHintingFromMap("hinting", m)
+	h, _, err := parse.GetFontHintingFromMap("hinting", m)
 	if err != nil {
 		return nil, err
-	}
-	if !ok {
-		h = font.HintingFull
 	}
 
 	fs, err := parse.GetRequiredFloatFromMap("font_size", m)
