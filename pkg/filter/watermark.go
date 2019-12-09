@@ -106,7 +106,7 @@ func (f watermark) drawWatermark(gx, gy int, s stamp.Stamp, g *grid, i *image.RG
 
 	s.Draw(minx*g.cs, miny*g.cs, f.c, i)
 
-	mf := float64(sh) / float64(sw) * 6
+	mf := float64(sh) / float64(sw) * 5
 	m := int(math.Round(float64(gw) * mf))
 	minx = minx - m
 	if minx < g.x {
